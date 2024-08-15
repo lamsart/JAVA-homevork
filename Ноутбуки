@@ -1,0 +1,103 @@
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class Main {
+    public static void main(String[] args) {
+        Set<Laptop> laptops = new HashSet<>();
+
+        laptops.add(new Laptop("Dell", 16, 512, "Windows 10", "Black"));
+        laptops.add(new Laptop("HP", 8, 256, "Windows 11", "Silver"));
+        laptops.add(new Laptop("Apple", 16, 1024, "macOS", "Gray"));
+        laptops.add(new Laptop("Asus", 32, 1024, "Windows 10", "White"));
+        laptops.add(new Laptop("Lenovo", 8, 512, "Linux", "Black"));
+
+        Map<String, Object> filters = getFiltersFromUser();
+
+        Set<Laptop> filteredLaptops = filterLaptops(laptops, filters);
+
+        if (filteredLaptops.isEmpty()) {
+            System.out.println("Ноутбуки, соответствующие заданным критериям, не найдены.");
+        } else {
+            System.out.println("Найденные ноутбуки:");
+            filteredLaptops.forEach(System.out::println);
+        }
+    }
+
+    private static Map<String, Object> getFiltersFromUser() {
+        Scanner scanner = new Scanner(System.in);
+        Map<String, Object> filters = new HashMap<>();
+
+        while (true) {
+            System.out.println("Введите цифру, соответствующую необходимому критерию, или 0 для завершения ввода:");
+            System.out.println("1 - ОЗУ");
+            System.out.println("2 - Объем ЖД");
+            System.out.println("3 - Операционная система");
+            System.out.println("4 - Цвет");
+
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+                case "1":
+                    System.out.println("Введите минимальный объем ОЗУ (в ГБ):");
+                    int minRam = Integer.parseInt(scanner.nextLine());
+                    filters.put("ram", minRam);
+                    break;
+                case "2":
+                    System.out.println("Введите минимальный объем ЖД (в ГБ):");
+                    int minStorage = Integer.parseInt(scanner.nextLine());
+                    filters.put("storage", minStorage);
+                    break;
+                case "3":
+                    System.out.println("Введите название операционной системы:");
+                    String os = scanner.nextLine();
+                    filters.put("os", os);
+                    break;
+                case "4":
+                    System.out.println("Введите цвет:");
+                    String color = scanner.nextLine();
+                    filters.put("color", color);
+                    break;
+                case "0":
+                    return filters;
+                default:
+                    System.out.println("Неверный выбор.");
+                    break;
+            }
+        }
+    }
+
+    private static Set<Laptop> filterLaptops(Set<Laptop> laptops, Map<String, Object> filters) {
+        return laptops.stream().filter(laptop -> {
+            boolean matches = true;
+
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                switch (entry.getKey()) {
+                    case "ram":
+                        if (laptop.getRam() < (int) entry.getValue()) {
+                            matches = false;
+                        }
+                        break;
+                    case "storage":
+                        if (laptop.getStorage() < (int) entry.getValue()) {
+                            matches = false;
+                        }
+                        break;
+                    case "os":
+                        if (!laptop.getOs().equalsIgnoreCase((String) entry.getValue())) {
+                            matches = false;
+                        }
+                        break;
+                    case "color":
+                        if (!laptop.getColor().equalsIgnoreCase((String) entry.getValue())) {
+                            matches = false;
+                        }
+                        break;
+                }
+                if (!matches) {
+                    break;
+                }
+            }
+            return matches;
+        }).collect(Collectors.toSet());
+    }
+}
